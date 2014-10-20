@@ -323,13 +323,10 @@ static void drawArcBall(const ShaderState& curSS) {
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-static void drawStuff() {
+static void drawStuff(const ShaderState& curSS, bool picking) {}/ { ...
   // if we are not translating, update arcball scale
   if (!(g_mouseMClickButton || (g_mouseLClickButton && g_mouseRClickButton) || (g_mouseLClickButton && !g_mouseRClickButton && g_spaceDown)))
     updateArcballScale();
-
-  // short hand for current shader state
-  const ShaderState& curSS = *g_shaderStates[g_activeShader];
 
   // build & send proj. matrix to vshader
   const Matrix4 projmat = makeProjectionMatrix();
@@ -346,25 +343,20 @@ static void drawStuff() {
   // draw ground
   // ===========
   //
-  const RigTForm groundRbt = RigTForm();  // identity
-  Matrix4 MVM = rigTFormToMatrix(invEyeRbt * groundRbt);
-  Matrix4 NMVM = normalMatrix(MVM);
-  sendModelViewNormalMatrix(curSS, MVM, NMVM);
-  safe_glUniform3f(curSS.h_uColor, 0.1, 0.95, 0.1); // set color
-  g_ground->draw(curSS);
-
-  // draw cubes
-  // ==========
-  for (int i = 0; i < 2; ++i) {
-    MVM = rigTFormToMatrix(invEyeRbt * g_objectRbt[i]);
-    NMVM = normalMatrix(MVM);
-    sendModelViewNormalMatrix(curSS, MVM, NMVM);
-    safe_glUniform3f(curSS.h_uColor, g_objectColors[i][0], g_objectColors[i][1], g_objectColors[i][2]);
-    g_cube->draw(curSS);
+  if (!picking) {
+    Drawer drawer(invEyeRbt, curSS);
+    g_world->accept(drawer);
+    if (g_displayArcball && shouldUseArcball()) {
+      drawArcBall(curSS);
+    }
   }
-
-  if (g_displayArcball && shouldUseArcball()) {
-    drawArcBall(curSS);
+  else {
+    Picker picker(invEyeRbt, curSS);
+    g_world->accept(picker);
+    glFlush();
+    g_currentPickedRbtNode = picker.getRbtNodeAtXY(g_mouseClickX, g_mouseClickY);
+    if (g_currentPickedRbtNode == g_groundNode)
+      g_currentPickedRbtNode = shared_ptr<SgRbtNode>();   // set to NULL
   }
 }
 
@@ -372,7 +364,7 @@ static void display() {
   glUseProgram(g_shaderStates[g_activeShader]->program);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);                   // clear framebuffer color&depth
 
-  drawStuff();
+  drawStuff(*g_shaderStates[g_activeShader], false);
 
   glutSwapBuffers();                                    // show the back buffer (where we rendered stuff)
 
