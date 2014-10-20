@@ -13,7 +13,7 @@ Picker::Picker(const RigTForm& initialRbt, const ShaderState& curSS)
   , srgbFrameBuffer_(!g_Gl2Compatible) {}
 
 bool Picker::visit(SgTransformNode& node) {
-  // TODO
+  //
   return drawer_.visit(node);
 }
 
@@ -33,8 +33,20 @@ bool Picker::postVisit(SgShapeNode& node) {
 }
 
 shared_ptr<SgRbtNode> Picker::getRbtNodeAtXY(int x, int y) {
-  // TODO
-  return shared_ptr<SgRbtNode>(); // return null for now
+  vector<unsigned char> pixbuf(3);
+
+  glReadPixels(x,y,1,1, GL_RED, GL_UNSIGNED_BYTE, (void*) &pixbuf[0]);
+  glReadPixels(x,y,1,1, GL_GREEN, GL_UNSIGNED_BYTE, (void*) &pixbuf[1]);
+  glReadPixels(x,y,1,1, GL_BLUE, GL_UNSIGNED_BYTE, (void*) &pixbuf[2]);
+  
+  PackedPixel* pp = (PackedPixel*) malloc(sizeof(PackedPixel));
+  pp->r = pixbuf[0];
+  pp->g = pixbuf[1];
+  pp->b = pixbuf[2];
+  int id;
+  id =  colorToId(*pp);
+
+  return find(id);
 }
 
 //------------------
