@@ -49,8 +49,11 @@ using namespace tr1;
 // To complete the assignment you only need to edit the shader files that get
 // loaded
 // ----------------------------------------------------------------------------
-static const bool g_Gl2Compatible = false;
-
+#ifdef __MAC__
+  const bool g_Gl2Compatible = false;
+#else
+  const bool g_Gl2Compatible = true;
+#endif
 
 static const float g_frustMinFov = 60.0;  // A minimal of 60 degree field of view
 static float g_frustFovY = g_frustMinFov; // FOV in y direction (updated by updateFrustFovY)
