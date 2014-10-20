@@ -84,6 +84,7 @@ static ObjId g_activeObject = SKY;
 static ObjId g_activeEye = SKY;
 static SkyMode g_activeCameraFrame = WORLD_SKY;
 
+static bool g_picking = false;
 static bool g_displayArcball = true;
 static double g_arcballScreenRadius = 100; // number of pixels
 static double g_arcballScale = 1;
@@ -368,7 +369,7 @@ static void display() {
   glUseProgram(g_shaderStates[g_activeShader]->program);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);                   // clear framebuffer color&depth
 
-  drawStuff(*g_shaderStates[g_activeShader], false);
+  drawStuff(*g_shaderStates[g_activeShader], g_picking);
 
   glutSwapBuffers();                                    // show the back buffer (where we rendered stuff)
 
@@ -536,6 +537,10 @@ static void keyboard(const unsigned char key, const int x, const int y) {
     break;
   case ' ':
     g_spaceDown = true;
+    break;
+  case 'p':
+    g_picking = !g_picking;
+    cerr << "Picking mode is " << ((g_picking) ? "on" : "off") << endl;
     break;
   }
   glutPostRedisplay();
