@@ -44,7 +44,9 @@ shared_ptr<SgRbtNode> Picker::getRbtNodeAtXY(int x, int y) {
   pp->g = pixbuf[1];
   pp->b = pixbuf[2];
   int id;
-  id =  colorToId(*pp);
+  id = colorToId(*pp);
+
+  free(pp);
 
   return find(id);
 }
