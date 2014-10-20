@@ -30,6 +30,10 @@
 #include "glsupport.h"
 #include "geometrymaker.h"
 #include "arcball.h"
+#include "asstcommon.h"
+#include "scenegraph.h"
+#include "drawer.h"
+#include "picker.h"
 
 using namespace std;
 using namespace tr1;
@@ -89,13 +93,13 @@ static const int PICKING_SHADER = 2; // index of the picking shader is g_shaerFi
 static const int g_numShaders = 3; // 3 shaders instead of 2
 static const char * const g_shaderFiles[g_numShaders][2] = {
   {"./shaders/basic-gl3.vshader", "./shaders/diffuse-gl3.fshader"},
-  {"./shaders/basic-gl3.vshader", "./shaders/solid-gl3.fshader"}
-  {"./shaders/basic-gl3.vshader", "./shaders/pick-gl3.fshader"}
+  {"./shaders/basic-gl3.vshader", "./shaders/solid-gl3.fshader"},
+  {"./shaders/basic-gl3.vshader", "./shaders/pick-gl3.fshader"},
 };
 static const char * const g_shaderFilesGl2[g_numShaders][2] = {
   {"./shaders/basic-gl2.vshader", "./shaders/diffuse-gl2.fshader"},
-  {"./shaders/basic-gl2.vshader", "./shaders/solid-gl2.fshader"}
-  {"./shaders/basic-gl2.vshader", "./shaders/pick-gl2.fshader"}
+  {"./shaders/basic-gl2.vshader", "./shaders/solid-gl2.fshader"},
+  {"./shaders/basic-gl2.vshader", "./shaders/pick-gl2.fshader"},
 };
 static vector<shared_ptr<ShaderState> > g_shaderStates; // our global shader states
 
@@ -127,7 +131,7 @@ struct VertexPN {
   }
 };
 
-class Geometry {
+struct Geometry {
   GlBufferObject vbo, ibo;
   GlArrayObject vao;
   int vboLen, iboLen;
@@ -323,7 +327,7 @@ static void drawArcBall(const ShaderState& curSS) {
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-static void drawStuff(const ShaderState& curSS, bool picking) {}/ { ...
+static void drawStuff(const ShaderState& curSS, bool picking) {
   // if we are not translating, update arcball scale
   if (!(g_mouseMClickButton || (g_mouseLClickButton && g_mouseRClickButton) || (g_mouseLClickButton && !g_mouseRClickButton && g_spaceDown)))
     updateArcballScale();
