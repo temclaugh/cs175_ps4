@@ -376,7 +376,7 @@ static void pick() {
 
   // Uncomment below and comment out the glutPostRedisplay in mouse(...) call back
   // to see result of the pick rendering pass
-  glutSwapBuffers();
+  /* glutSwapBuffers(); */
 
   //Now set back the clear color
   glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
@@ -506,19 +506,12 @@ static void mouse(const int button, const int state, const int x, const int y) {
   g_mouseRClickButton &= !(button == GLUT_RIGHT_BUTTON && state == GLUT_UP);
   g_mouseMClickButton &= !(button == GLUT_MIDDLE_BUTTON && state == GLUT_UP);
 
-
-
-  bool prevMouse = g_mouseClickDown;
   g_mouseClickDown = g_mouseLClickButton || g_mouseRClickButton || g_mouseMClickButton;
-  bool mouseClickUp = prevMouse && !g_mouseClickDown;
-  if (g_picking && mouseClickUp) {
-    g_picking = false;
-    cerr << "Picking mode is off" << endl;
-    cerr << "current node is";
-    cerr << g_currentPickedRbtNode << endl;
-  }
   if (g_picking && g_mouseClickDown) {
     pick();
+    g_picking = false;
+    cout << g_currentPickedRbtNode << endl;
+    cerr << "Picking mode is off" << endl;
   }
   glutPostRedisplay();
 }
