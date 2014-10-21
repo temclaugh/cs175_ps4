@@ -345,34 +345,31 @@ static void drawStuff(const ShaderState& curSS, bool picking) {
   safe_glUniform3f(curSS.h_uLight, eyeLight1[0], eyeLight1[1], eyeLight1[2]);
   safe_glUniform3f(curSS.h_uLight2, eyeLight2[0], eyeLight2[1], eyeLight2[2]);
 
-  // draw ground
-  // ===========
-  //
   if (!picking) {
     Drawer drawer(invEyeRbt, curSS);
     g_world->accept(drawer);
     if (g_displayArcball && shouldUseArcball()) {
       drawArcBall(curSS);
     }
+    glutSwapBuffers();
   }
   else {
     Picker picker(invEyeRbt, curSS);
     g_world->accept(picker);
     glFlush();
     g_currentPickedRbtNode = picker.getRbtNodeAtXY(g_mouseClickX, g_mouseClickY);
-    cout << ">>>> " << g_currentPickedRbtNode << endl;
     if (g_currentPickedRbtNode == g_groundNode)
       g_currentPickedRbtNode = shared_ptr<SgRbtNode>();   // set to NULL
   }
 }
 
 static void display() {
+  g_activeShader = (g_picking) ? 1 : 1;
   glUseProgram(g_shaderStates[g_activeShader]->program);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);                   // clear framebuffer color&depth
 
   drawStuff(*g_shaderStates[g_activeShader], g_picking);
 
-  glutSwapBuffers();                                    // show the back buffer (where we rendered stuff)
 
   checkGlErrors();
 }

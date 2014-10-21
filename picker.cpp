@@ -26,13 +26,13 @@ bool Picker::visit(SgShapeNode& node) {
   idCounter_++;
   cout << "visited shapenode" << endl;
   shared_ptr<SgRbtNode> temp_node;
+  cout << temp_node << endl;
   cout << "nodestack is " << nodeStack_.size() << " units tall." << endl;
 
   for (int i = nodeStack_.size() - 1; i >= 0; i--) {
     cout << "looping... index:" << i << endl;
-    shared_ptr<SgRbtNode> temp_node = dynamic_pointer_cast<SgRbtNode>(nodeStack_[i]);
+    temp_node = dynamic_pointer_cast<SgRbtNode>(nodeStack_[i]);
     if (temp_node) {
-      cout << "Found shape parent" << endl;
       break;
     }
   }
@@ -41,9 +41,9 @@ bool Picker::visit(SgShapeNode& node) {
   addToMap(idCounter_, temp_node);
 
   GLint uid = drawer_.getCurSS().h_uIdColor;
+  cout << "id " << idCounter_ << endl;
   safe_glUniform3f(uid, idToColor(idCounter_)[0], idToColor(idCounter_)[1], idToColor(idCounter_)[2]);
 
-  return drawer_.visit(node);
 }
 
 bool Picker::postVisit(SgShapeNode& node) {
@@ -51,11 +51,8 @@ bool Picker::postVisit(SgShapeNode& node) {
 }
 
 shared_ptr<SgRbtNode> Picker::getRbtNodeAtXY(int x, int y) {
-
   PackedPixel pp;
-  glReadPixels(x,y,1,1, GL_RED, GL_UNSIGNED_BYTE, (void*) &pp.r);
-  glReadPixels(x,y,1,1, GL_GREEN, GL_UNSIGNED_BYTE, (void*) &pp.g);
-  glReadPixels(x,y,1,1, GL_BLUE, GL_UNSIGNED_BYTE, (void*) &pp.b);
+  glReadPixels(x,y,1,1, GL_RGB, GL_UNSIGNED_BYTE, (void*) &pp);
   int id = colorToId(pp);
   return find(id);
 }
