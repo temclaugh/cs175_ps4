@@ -13,22 +13,41 @@ Picker::Picker(const RigTForm& initialRbt, const ShaderState& curSS)
   , srgbFrameBuffer_(!g_Gl2Compatible) {}
 
 bool Picker::visit(SgTransformNode& node) {
-  //
+  nodeStack_.push_back(node.shared_from_this());
   return drawer_.visit(node);
 }
 
 bool Picker::postVisit(SgTransformNode& node) {
-  // TODO
+  nodeStack_.pop_back();
   return drawer_.postVisit(node);
 }
 
 bool Picker::visit(SgShapeNode& node) {
-  // TODO
+  idCounter_++;
+  cout << "visited shapenode" << endl;
+  shared_ptr<SgRbtNode> temp_node;
+  cout << "nodestack is " << nodeStack_.size() << " units tall." << endl;
+  
+  for (int i = nodeStack_.size() - 1; i >= 0; i--) {
+    cout << "looping... index:" << i << endl;
+    shared_ptr<SgRbtNode> temp_node = dynamic_pointer_cast<SgRbtNode>(nodeStack_[i]);
+    if (temp_node) {
+      cout << "Found shape parent" << endl;
+      break;
+    }
+  }
+
+  // when done, temp is an SgRbtNode
+  addToMap(idCounter_, temp_node);
+  
+  // TODO: figure out how the hell to set the color :/
+  //ShaderState tempSS = ShaderState(drawer_.getCurSS());
+
+
   return drawer_.visit(node);
 }
 
 bool Picker::postVisit(SgShapeNode& node) {
-  // TODO
   return drawer_.postVisit(node);
 }
 
