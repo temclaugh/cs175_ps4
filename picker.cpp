@@ -41,7 +41,8 @@ bool Picker::visit(SgShapeNode& node) {
   addToMap(idCounter_, temp_node);
   
   // TODO: figure out how the hell to set the color :/
-  //ShaderState tempSS = ShaderState(drawer_.getCurSS());
+  GLint uid = drawer_.getCurSS().h_uIdColor;
+  safe_glUniform3f(uid, idToColor(idCounter_)[0], idToColor(idCounter_)[1], idToColor(idCounter_)[2]);
 
 
   return drawer_.visit(node);
@@ -53,14 +54,12 @@ bool Picker::postVisit(SgShapeNode& node) {
 
 shared_ptr<SgRbtNode> Picker::getRbtNodeAtXY(int x, int y) {
 
-  PackedPixel* pp = (PackedPixel*) malloc(sizeof(PackedPixel));
-  glReadPixels(x,y,1,1, GL_RED, GL_UNSIGNED_BYTE, (void*) &pp->r);
-  glReadPixels(x,y,1,1, GL_GREEN, GL_UNSIGNED_BYTE, (void*) &pp->g);
-  glReadPixels(x,y,1,1, GL_BLUE, GL_UNSIGNED_BYTE, (void*) &pp->b);
+  PackedPixel pp;
+  glReadPixels(x,y,1,1, GL_RED, GL_UNSIGNED_BYTE, (void*) &pp.r);
+  glReadPixels(x,y,1,1, GL_GREEN, GL_UNSIGNED_BYTE, (void*) &pp.g);
+  glReadPixels(x,y,1,1, GL_BLUE, GL_UNSIGNED_BYTE, (void*) &pp.b);
   
-  int id = colorToId(*pp);
-
-  free(pp);
+  int id = colorToId(pp);
 
   return find(id);
 }
