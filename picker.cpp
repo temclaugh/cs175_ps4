@@ -24,13 +24,9 @@ bool Picker::postVisit(SgTransformNode& node) {
 
 bool Picker::visit(SgShapeNode& node) {
   idCounter_++;
-  cout << "visited shapenode" << endl;
   shared_ptr<SgRbtNode> temp_node;
-  cout << temp_node << endl;
-  cout << "nodestack is " << nodeStack_.size() << " units tall." << endl;
 
   for (int i = nodeStack_.size() - 1; i >= 0; i--) {
-    cout << "looping... index:" << i << endl;
     temp_node = dynamic_pointer_cast<SgRbtNode>(nodeStack_[i]);
     if (temp_node) {
       break;
@@ -41,8 +37,9 @@ bool Picker::visit(SgShapeNode& node) {
   addToMap(idCounter_, temp_node);
 
   GLint uid = drawer_.getCurSS().h_uIdColor;
-  cout << "id " << idCounter_ << endl;
   safe_glUniform3f(uid, idToColor(idCounter_)[0], idToColor(idCounter_)[1], idToColor(idCounter_)[2]);
+
+  return drawer_.visit(node);
 
 }
 

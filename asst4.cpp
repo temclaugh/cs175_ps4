@@ -195,9 +195,6 @@ static Cvec3f g_objectColors[2] = {Cvec3f(1, 0, 0), Cvec3f(0, 0, 1)};
 ///////////////// END OF G L O B A L S //////////////////////////////////////////////////
 
 
-
-
-
 static void initGround() {
   // A x-z plane at y = g_groundY of dimension [-g_groundSize, g_groundSize]^2
   VertexPN vtx[4] = {
@@ -363,14 +360,36 @@ static void drawStuff(const ShaderState& curSS, bool picking) {
   }
 }
 
+static void pick() {
+  // We need to set the clear color to black, for pick rendering.
+  // so let's save the clear color
+  GLdouble clearColor[4];
+  glGetDoublev(GL_COLOR_CLEAR_VALUE, clearColor);
+
+  glClearColor(0, 0, 0, 0);
+
+  // using PICKING_SHADER as the shader
+  glUseProgram(g_shaderStates[PICKING_SHADER]->program);
+
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  drawStuff(*g_shaderStates[PICKING_SHADER], true);
+
+  // Uncomment below and comment out the glutPostRedisplay in mouse(...) call back
+  // to see result of the pick rendering pass
+  glutSwapBuffers();
+
+  //Now set back the clear color
+  glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+
+  checkGlErrors();
+}
+
+
 static void display() {
-  g_activeShader = (g_picking) ? 1 : 1;
   glUseProgram(g_shaderStates[g_activeShader]->program);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);                   // clear framebuffer color&depth
 
   drawStuff(*g_shaderStates[g_activeShader], g_picking);
-
-
   checkGlErrors();
 }
 
@@ -475,7 +494,6 @@ static void motion(const int x, const int y) {
   glutPostRedisplay();                    // we always redraw if we changed the scene
 }
 
-
 static void mouse(const int button, const int state, const int x, const int y) {
   g_mouseClickX = x;
   g_mouseClickY = g_windowHeight - y - 1;  // conversion from GLUT window-coordinate-system to OpenGL window-coordinate-system
@@ -488,7 +506,20 @@ static void mouse(const int button, const int state, const int x, const int y) {
   g_mouseRClickButton &= !(button == GLUT_RIGHT_BUTTON && state == GLUT_UP);
   g_mouseMClickButton &= !(button == GLUT_MIDDLE_BUTTON && state == GLUT_UP);
 
+
+
+  bool prevMouse = g_mouseClickDown;
   g_mouseClickDown = g_mouseLClickButton || g_mouseRClickButton || g_mouseMClickButton;
+  bool mouseClickUp = prevMouse && !g_mouseClickDown;
+  if (g_picking && mouseClickUp) {
+    g_picking = false;
+    cerr << "Picking mode is off" << endl;
+    cerr << "current node is";
+    cerr << g_currentPickedRbtNode << endl;
+  }
+  if (g_picking && g_mouseClickDown) {
+    pick();
+  }
   glutPostRedisplay();
 }
 
