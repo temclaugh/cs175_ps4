@@ -27,7 +27,7 @@ bool Picker::visit(SgShapeNode& node) {
   cout << "visited shapenode" << endl;
   shared_ptr<SgRbtNode> temp_node;
   cout << "nodestack is " << nodeStack_.size() << " units tall." << endl;
-  
+
   for (int i = nodeStack_.size() - 1; i >= 0; i--) {
     cout << "looping... index:" << i << endl;
     shared_ptr<SgRbtNode> temp_node = dynamic_pointer_cast<SgRbtNode>(nodeStack_[i]);
@@ -39,9 +39,9 @@ bool Picker::visit(SgShapeNode& node) {
 
   // when done, temp is an SgRbtNode
   addToMap(idCounter_, temp_node);
-  
+
   // TODO: figure out how the hell to set the color :/
-  //ShaderState tempSS = ShaderState(drawer_.getCurSS());
+  /* ShaderState tempSS = ShaderState(drawer_.getCurSS()); */
 
 
   return drawer_.visit(node);
@@ -53,15 +53,12 @@ bool Picker::postVisit(SgShapeNode& node) {
 
 shared_ptr<SgRbtNode> Picker::getRbtNodeAtXY(int x, int y) {
 
-  PackedPixel* pp = (PackedPixel*) malloc(sizeof(PackedPixel));
-  glReadPixels(x,y,1,1, GL_RED, GL_UNSIGNED_BYTE, (void*) &pp->r);
-  glReadPixels(x,y,1,1, GL_GREEN, GL_UNSIGNED_BYTE, (void*) &pp->g);
-  glReadPixels(x,y,1,1, GL_BLUE, GL_UNSIGNED_BYTE, (void*) &pp->b);
-  
-  int id = colorToId(*pp);
+  PackedPixel pp;
+  glReadPixels(x,y,1,1, GL_RED, GL_UNSIGNED_BYTE, (void*) &pp.r);
+  glReadPixels(x,y,1,1, GL_GREEN, GL_UNSIGNED_BYTE, (void*) &pp.g);
+  glReadPixels(x,y,1,1, GL_BLUE, GL_UNSIGNED_BYTE, (void*) &pp.b);
 
-  free(pp);
-
+  int id = colorToId(pp);
   return find(id);
 }
 

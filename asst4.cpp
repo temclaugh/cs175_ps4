@@ -360,6 +360,7 @@ static void drawStuff(const ShaderState& curSS, bool picking) {
     g_world->accept(picker);
     glFlush();
     g_currentPickedRbtNode = picker.getRbtNodeAtXY(g_mouseClickX, g_mouseClickY);
+    cout << ">>>> " << g_currentPickedRbtNode << endl;
     if (g_currentPickedRbtNode == g_groundNode)
       g_currentPickedRbtNode = shared_ptr<SgRbtNode>();   // set to NULL
   }
