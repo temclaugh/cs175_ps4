@@ -188,8 +188,6 @@ static shared_ptr<SgRbtNode> g_skyNode, g_groundNode, g_robot1Node, g_robot2Node
 static shared_ptr<SgRbtNode> g_currentPickedRbtNode; // used later when you do picking
 
 static const Cvec3 g_light1(2.0, 3.0, 14.0), g_light2(-2, -3.0, -5.0);  // define two lights positions in world space
-static RigTForm g_skyRbt = RigTForm(Cvec3(0.0, 0.25, 4.0));
-static RigTForm g_objectRbt[2] = {RigTForm(Cvec3(-1,0,0)), RigTForm(Cvec3(1,0,0))};
 static Cvec3f g_objectColors[2] = {Cvec3f(1, 0, 0), Cvec3f(0, 0, 1)};
 
 ///////////////// END OF G L O B A L S //////////////////////////////////////////////////
@@ -239,13 +237,31 @@ static void sendProjectionMatrix(const ShaderState& curSS, const Matrix4& projMa
 }
 
 static RigTForm getRbtFromObjId(ObjId objId) {
-  RigTForm* rbts[] = {&g_skyRbt, &g_objectRbt[0], &g_objectRbt[1]};
-  return *rbts[objId];
+  if (objId == 0) {
+    return getPathAccumRbt(g_world, g_skyNode);
+  }
+  else if (objId == 1) {
+    return getPathAccumRbt(g_world, g_robot1Node);
+  }
+  else if (objId == 2) {
+    return getPathAccumRbt(g_world, g_robot2Node);
+  }
+  return RigTForm();
 }
 
 static void setRbtFromObjId(ObjId objId, const RigTForm& rbt) {
-  RigTForm* rbts[] = {&g_skyRbt, &g_objectRbt[0], &g_objectRbt[1]};
-  *rbts[objId] = rbt;
+  // RigTForm* rbts[] = {&g_skyRbt, &g_objectRbt[0], &g_objectRbt[1]};
+  // *rbts[objId] = rbt;
+  if (objId == 0) {
+    g_skyNode->setRbt(rbt);
+  }
+  else if (objId == 1) {
+    g_robot1Node->setRbt(rbt);
+  }
+  else if (objId == 2) {
+    g_robot2Node->setRbt(rbt);
+  }
+
 }
 
 // update g_frustFovY from g_frustMinFov, g_windowWidth, and g_windowHeight
@@ -334,7 +350,8 @@ static void drawStuff(const ShaderState& curSS, bool picking) {
   const Matrix4 projmat = makeProjectionMatrix();
   sendProjectionMatrix(curSS, projmat);
 
-  const RigTForm eyeRbt = getRbtFromObjId(g_activeEye);
+  //const RigTForm eyeRbt = getRbtFromObjId(g_activeEye);
+  const RigTForm eyeRbt = getPathAccumRbt(g_world, g_skyNode);
   const RigTForm invEyeRbt = inv(eyeRbt);
 
   const Cvec3 eyeLight1 = Cvec3(invEyeRbt * Cvec4(g_light1, 1));
@@ -350,14 +367,14 @@ static void drawStuff(const ShaderState& curSS, bool picking) {
     }
     glutSwapBuffers();
   }
-  else {
+/*  else {
     Picker picker(invEyeRbt, curSS);
     g_world->accept(picker);
     glFlush();
     g_currentPickedRbtNode = picker.getRbtNodeAtXY(g_mouseClickX, g_mouseClickY);
     if (g_currentPickedRbtNode == g_groundNode)
       g_currentPickedRbtNode = shared_ptr<SgRbtNode>();   // set to NULL
-  }
+  }*/
 }
 
 static void pick() {
@@ -376,7 +393,7 @@ static void pick() {
 
   // Uncomment below and comment out the glutPostRedisplay in mouse(...) call back
   // to see result of the pick rendering pass
-  /* glutSwapBuffers(); */
+  glutSwapBuffers();
 
   //Now set back the clear color
   glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
@@ -506,12 +523,19 @@ static void mouse(const int button, const int state, const int x, const int y) {
   g_mouseRClickButton &= !(button == GLUT_RIGHT_BUTTON && state == GLUT_UP);
   g_mouseMClickButton &= !(button == GLUT_MIDDLE_BUTTON && state == GLUT_UP);
 
+
+
+  bool prevMouse = g_mouseClickDown;
   g_mouseClickDown = g_mouseLClickButton || g_mouseRClickButton || g_mouseMClickButton;
+  bool mouseClickUp = prevMouse && !g_mouseClickDown;
+  if (g_picking && mouseClickUp) {
+    g_picking = false;
+    cerr << "Picking mode is off" << endl;
+    cerr << "current node is";
+    cerr << g_currentPickedRbtNode << endl;
+  }
   if (g_picking && g_mouseClickDown) {
     pick();
-    g_picking = false;
-    cout << g_currentPickedRbtNode << endl;
-    cerr << "Picking mode is off" << endl;
   }
   glutPostRedisplay();
 }
