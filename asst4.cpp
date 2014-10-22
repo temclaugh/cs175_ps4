@@ -67,7 +67,7 @@ static const float g_frustFar = -50.0;    // far plane
 static const float g_groundY = -2.0;      // y coordinate of the ground
 static const float g_groundSize = 10.0;   // half the ground length
 
-enum ObjId {SKY=0, ROBOT1=1, ROBOT2=2};
+enum ObjId {SKY=0, ROBOT1=1, ROBOT2=2, NULLOBJ=3};
 enum SkyMode {WORLD_SKY=0, SKY_SKY=1};
 
 static const char * const g_objNames[] = {"Sky", "Robot 1", "Robot 2"};
@@ -317,7 +317,13 @@ static bool shouldUseArcball() {
 static RigTForm getArcballRbt() {
   switch (getManipMode()) {
   case ARCBALL_ON_PICKED:
-    return getRbtFromObjId(g_activeObject);
+    if (g_activeObject == SKY) {
+      return getRbtFromObjId(g_activeObject);
+    }
+    else if (g_activeObject == NULLOBJ) {
+      return getPathAccumRbt(g_world, g_currentPickedRbtNode);
+    }
+    
   case ARCBALL_ON_SKY:
     return RigTForm();
   case EGO_MOTION:
@@ -382,6 +388,17 @@ static void drawStuff(const ShaderState& curSS, bool picking) {
     g_world->accept(picker);
     glFlush();
     g_currentPickedRbtNode = picker.getRbtNodeAtXY(g_mouseClickX, g_mouseClickY);
+
+    if (!g_currentPickedRbtNode) {
+      g_activeObject = SKY;
+    }
+    else if (g_currentPickedRbtNode == g_groundNode) {
+      g_activeObject = SKY;
+    }
+    else {
+      g_activeObject = NULLOBJ;
+    }
+
     if (g_currentPickedRbtNode == g_groundNode)
       g_currentPickedRbtNode = shared_ptr<SgRbtNode>();   // set to NULL
   }
@@ -509,12 +526,28 @@ static void motion(const int x, const int y) {
 
   const RigTForm M = getMRbt(dx, dy);   // the "action" matrix
 
+  if (g_activeObject == SKY) {
+
+    // the matrix for the auxiliary frame (the w.r.t.)
+    const RigTForm A = makeMixedFrame(getArcballRbt(), getRbtFromObjId(g_activeEye));
+
+    RigTForm O = doMtoOwrtA(M, getRbtFromObjId(g_activeObject), A);
+
+    setRbtFromObjId(g_activeObject, O);
+
+  }
+  else if(g_activeObject == NULLOBJ) {
+
+    const RigTForm A = makeMixedFrame(getArcballRbt(), getRbtFromObjId(g_activeEye));
+
+    RigTForm O = doMtoOwrtA(M, getRbtFromObjId(g_activeObject), A);
+
+    setRbtFromObjId(g_activeObject, O);
+  }
+
+
   // the matrix for the auxiliary frame (the w.r.t.)
-  const RigTForm A = makeMixedFrame(getArcballRbt(), getRbtFromObjId(g_activeEye));
 
-  RigTForm O = doMtoOwrtA(M, getRbtFromObjId(g_activeObject), A);
-
-  setRbtFromObjId(g_activeObject, O);
 
   g_mouseClickX += dx;
   g_mouseClickY += dy;
