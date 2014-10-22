@@ -538,11 +538,26 @@ static void motion(const int x, const int y) {
   }
   else if(g_activeObject == NULLOBJ) {
 
-    const RigTForm A = makeMixedFrame(getArcballRbt(), getRbtFromObjId(g_activeEye));
+    shared_ptr<SgRbtNode> eyeNode;
 
-    RigTForm O = doMtoOwrtA(M, getRbtFromObjId(g_activeObject), A);
+    if (g_activeEye == SKY) {
+      eyeNode = g_skyNode;
+    }
+    else if (g_activeEye == ROBOT1) {
+      eyeNode = g_robot1Node;
+    }
+    else if (g_activeEye == ROBOT2) {
+      eyeNode = g_robot2Node;
+    }
 
-    setRbtFromObjId(g_activeObject, O);
+    const RigTForm A = makeMixedFrame(getPathAccumRbt(g_world, g_currentPickedRbtNode),
+                                      getPathAccumRbt(g_world, eyeNode));
+
+    const RigTForm A_s = A * getPathAccumRbt(g_world, g_currentPickedRbtNode, 1); 
+
+    RigTForm O = doMtoOwrtA(M, g_currentPickedRbtNode->getRbt(), A_s);
+
+    g_currentPickedRbtNode->setRbt(O);
   }
 
 
