@@ -628,7 +628,7 @@ static void constructRobot(shared_ptr<SgTransformNode> base, const Cvec3& color)
                TORSO_LEN = 1.5,
                TORSO_THICK = 0.25,
                TORSO_WIDTH = 1,
-               HEAD_RADIUS = .5;
+               HEAD_RADIUS = .3;
   const int NUM_JOINTS = 10,
             NUM_SHAPES = 10;
 
