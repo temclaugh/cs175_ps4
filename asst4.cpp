@@ -367,14 +367,14 @@ static void drawStuff(const ShaderState& curSS, bool picking) {
     }
     glutSwapBuffers();
   }
-/*  else {
+  else {
     Picker picker(invEyeRbt, curSS);
     g_world->accept(picker);
     glFlush();
     g_currentPickedRbtNode = picker.getRbtNodeAtXY(g_mouseClickX, g_mouseClickY);
     if (g_currentPickedRbtNode == g_groundNode)
       g_currentPickedRbtNode = shared_ptr<SgRbtNode>();   // set to NULL
-  }*/
+  }
 }
 
 static void pick() {
@@ -406,7 +406,7 @@ static void display() {
   glUseProgram(g_shaderStates[g_activeShader]->program);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);                   // clear framebuffer color&depth
 
-  drawStuff(*g_shaderStates[g_activeShader], g_picking);
+  drawStuff(*g_shaderStates[g_activeShader], false);
   checkGlErrors();
 }
 
@@ -581,9 +581,10 @@ static void keyboard(const unsigned char key, const int x, const int y) {
     g_spaceDown = true;
     break;
   case 'p':
+    glutPostRedisplay();
     g_picking = !g_picking;
     cerr << "Picking mode is " << ((g_picking) ? "on" : "off") << endl;
-    break;
+    return;
   }
   glutPostRedisplay();
 }
@@ -659,15 +660,28 @@ static void constructRobot(shared_ptr<SgTransformNode> base, const Cvec3& color)
 
   JointDesc jointDesc[NUM_JOINTS] = {
     {-1}, // torso
-    {0,  TORSO_WIDTH/2, TORSO_LEN/2, 0}, // upper right arm
-    {1,  ARM_LEN, 0, 0}, // lower right arm
-    {0,  -TORSO_WIDTH/2, TORSO_LEN/2, 0}, // upper left arm
-    {3,  -ARM_LEN, 0, 0}, // lower left arm
-    {0,  0, -TORSO_LEN/2 - LEG_LEN/2, 0}, // upper right leg
-    {5,  0, -LEG_LEN, 0}, // lower right leg
-    {0,  -TORSO_WIDTH + LEG_THICK/2, -TORSO_LEN/2 - LEG_LEN/2, 0}, // upper left leg
-    {7,  0, -LEG_LEN, 0}, // lower left leg
+    {0, TORSO_WIDTH/2, TORSO_LEN/2, 0}, // upper right arm
+    {1, ARM_LEN, 0, 0}, // lower right arm
+    {0, -TORSO_WIDTH/2, TORSO_LEN/2, 0}, // upper left arm
+    {3, -ARM_LEN, 0, 0}, // lower left arm
+    {0, 0, -TORSO_LEN/2 - LEG_LEN/2, 0}, // upper right leg
+    {5, 0, -LEG_LEN, 0}, // lower right leg
+    {0, -TORSO_WIDTH + LEG_THICK/2, -TORSO_LEN/2 - LEG_LEN/2, 0}, // upper left leg
+    {7, 0, -LEG_LEN, 0}, // lower left leg
     {0, 0, TORSO_LEN/2, 0}, // head
+  };
+
+  char *names[] = {
+    "torso",
+    "upper right arm",
+    "lower right arm",
+    "upper left arm",
+    "lower left arm",
+    "upper right leg",
+    "lower right leg",
+    "upper left leg",
+    "lower left leg",
+    "head",
   };
 
   struct ShapeDesc {
@@ -680,13 +694,13 @@ static void constructRobot(shared_ptr<SgTransformNode> base, const Cvec3& color)
     {0, 0,         0, 0, TORSO_WIDTH, TORSO_LEN, TORSO_THICK, g_cube}, // torso
     {1, ARM_LEN/2, 0, 0, ARM_LEN/2, ARM_THICK/2, ARM_THICK/2, g_sphere}, // upper right arm
     {2, ARM_LEN/2, 0, 0, ARM_LEN, ARM_THICK, ARM_THICK, g_cube}, // lower right arm
-    {3, -ARM_LEN/2, 0, 0, ARM_LEN/2, ARM_THICK/2, ARM_THICK/2, g_sphere}, // upper right arm
-    {4, -ARM_LEN/2, 0, 0, ARM_LEN, ARM_THICK, ARM_THICK, g_cube}, // lower right arm
+    {3, -ARM_LEN/2, 0, 0, ARM_LEN/2, ARM_THICK/2, ARM_THICK/2, g_sphere}, // upper left arm
+    {4, -ARM_LEN/2, 0, 0, ARM_LEN, ARM_THICK, ARM_THICK, g_cube}, // lower left arm
     {5, LEG_LEN/2, 0, 0, LEG_THICK/2, LEG_LEN/2, LEG_THICK/2, g_sphere}, // upper right leg
     {6, LEG_LEN/2, 0, 0, LEG_THICK, LEG_LEN, LEG_THICK, g_cube}, // lower right leg
     {7, LEG_LEN/2, 0, 0, LEG_THICK/2, LEG_LEN/2, LEG_THICK/2, g_sphere}, // upper left leg
     {8, LEG_LEN/2, 0, 0, LEG_THICK, LEG_LEN, LEG_THICK, g_cube}, // lower left leg
-    {9, 0, HEAD_RADIUS, 0, HEAD_RADIUS, HEAD_RADIUS, HEAD_RADIUS, g_sphere}, // lower left leg
+    {9, 0, HEAD_RADIUS, 0, HEAD_RADIUS, HEAD_RADIUS, HEAD_RADIUS, g_sphere}, // head
   };
 
   shared_ptr<SgTransformNode> jointNodes[NUM_JOINTS];
@@ -698,6 +712,7 @@ static void constructRobot(shared_ptr<SgTransformNode> base, const Cvec3& color)
       jointNodes[i].reset(new SgRbtNode(RigTForm(Cvec3(jointDesc[i].x, jointDesc[i].y, jointDesc[i].z))));
       jointNodes[jointDesc[i].parent]->addChild(jointNodes[i]);
     }
+    cout << jointNodes[i] << " " << names[i] << endl;
   }
   for (int i = 0; i < NUM_SHAPES; ++i) {
     shared_ptr<MyShapeNode> shape(

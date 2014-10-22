@@ -42,19 +42,11 @@ public:
 
   const RigTForm getAccumulatedRbt(int offsetFromStackTop = 0) {
     RigTForm base = RigTForm();
-    cout << "getting Rbt" << endl;
-    cout << rbtStack_.size() << endl;
     for (int i = 1; i < rbtStack_.size() - offsetFromStackTop; i++) {
-      cout << "in stack, level " << i << endl;
       base = base * rbtStack_[i];
     }
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++)
-        cout << rigTFormToMatrix(base)(i,j);
-      cout << endl;
-    }
 
-    
+
     return base;
 
   }
@@ -63,9 +55,7 @@ public:
     rbtStack_.push_back(node.getRbt());
 
     if (node == target_) {
-      cout << "found target" << endl;
       return false;
-      //found_ = true;
     }
 
     return true;
@@ -80,7 +70,7 @@ RigTForm getPathAccumRbt(
   shared_ptr<SgTransformNode> source,
   shared_ptr<SgTransformNode> destination,
   int offsetFromDestination) {
- 
+
   // Ensure source and destination aren't null ptrs
   assert(source);
   assert(destination);

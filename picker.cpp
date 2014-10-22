@@ -50,6 +50,7 @@ bool Picker::postVisit(SgShapeNode& node) {
 shared_ptr<SgRbtNode> Picker::getRbtNodeAtXY(int x, int y) {
   PackedPixel pp;
   glReadPixels(x,y,1,1, GL_RGB, GL_UNSIGNED_BYTE, (void*) &pp);
+  cout << (unsigned int)pp.r << " " << (unsigned int)pp.g << " " << (unsigned int)pp.b << endl;
   int id = colorToId(pp);
   return find(id);
 }
