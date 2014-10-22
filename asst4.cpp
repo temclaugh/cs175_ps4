@@ -323,7 +323,7 @@ static RigTForm getArcballRbt() {
     else if (g_activeObject == NULLOBJ) {
       return getPathAccumRbt(g_world, g_currentPickedRbtNode);
     }
-    
+
   case ARCBALL_ON_SKY:
     return RigTForm();
   case EGO_MOTION:
@@ -722,9 +722,9 @@ static void constructRobot(shared_ptr<SgTransformNode> base, const Cvec3& color)
     {1, ARM_LEN, 0, 0}, // lower right arm
     {0, -TORSO_WIDTH/2, TORSO_LEN/2, 0}, // upper left arm
     {3, -ARM_LEN, 0, 0}, // lower left arm
-    {0, 0, -TORSO_LEN/2 - LEG_LEN/2, 0}, // upper right leg
+    {0, TORSO_WIDTH/2 - LEG_THICK/2, -TORSO_LEN/2, 0}, // upper right leg
     {5, 0, -LEG_LEN, 0}, // lower right leg
-    {0, -TORSO_WIDTH + LEG_THICK/2, -TORSO_LEN/2 - LEG_LEN/2, 0}, // upper left leg
+    {0, -TORSO_WIDTH/2 + LEG_THICK/2, -TORSO_LEN/2, 0}, // upper left leg
     {7, 0, -LEG_LEN, 0}, // lower left leg
     {0, 0, TORSO_LEN/2, 0}, // head
   };
@@ -754,10 +754,10 @@ static void constructRobot(shared_ptr<SgTransformNode> base, const Cvec3& color)
     {2, ARM_LEN/2, 0, 0, ARM_LEN, ARM_THICK, ARM_THICK, g_cube}, // lower right arm
     {3, -ARM_LEN/2, 0, 0, ARM_LEN/2, ARM_THICK/2, ARM_THICK/2, g_sphere}, // upper left arm
     {4, -ARM_LEN/2, 0, 0, ARM_LEN, ARM_THICK, ARM_THICK, g_cube}, // lower left arm
-    {5, LEG_LEN/2, 0, 0, LEG_THICK/2, LEG_LEN/2, LEG_THICK/2, g_sphere}, // upper right leg
-    {6, LEG_LEN/2, 0, 0, LEG_THICK, LEG_LEN, LEG_THICK, g_cube}, // lower right leg
-    {7, LEG_LEN/2, 0, 0, LEG_THICK/2, LEG_LEN/2, LEG_THICK/2, g_sphere}, // upper left leg
-    {8, LEG_LEN/2, 0, 0, LEG_THICK, LEG_LEN, LEG_THICK, g_cube}, // lower left leg
+    {5, 0, -LEG_LEN/2, 0, LEG_THICK/2, LEG_LEN/2, LEG_THICK/2, g_sphere}, // upper right leg
+    {6, 0, -LEG_LEN/2, 0, LEG_THICK, LEG_LEN, LEG_THICK, g_cube}, // lower right leg
+    {7, 0, -LEG_LEN/2, 0, LEG_THICK/2, LEG_LEN/2, LEG_THICK/2, g_sphere}, // upper left leg
+    {8, 0, -LEG_LEN/2, 0, LEG_THICK, LEG_LEN, LEG_THICK, g_cube}, // lower left leg
     {9, 0, HEAD_RADIUS, 0, HEAD_RADIUS, HEAD_RADIUS, HEAD_RADIUS, g_sphere}, // head
   };
 
