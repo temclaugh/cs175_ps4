@@ -6,6 +6,19 @@
 using namespace std;
 using namespace std::tr1;
 
+void p_rbt(RigTForm t) {
+  cout << "-------" << endl;
+  for (int i = 0; i < 4; ++i) {
+    cout << " ";
+    for (int j = 0; j < 4; ++j) {
+      cout << " " << rigTFormToMatrix(t)(i, j);
+    }
+    cout << endl;
+  }
+  cout << "-------" << endl;
+  cout << endl;
+}
+
 bool SgTransformNode::accept(SgNodeVisitor& visitor) {
   if (!visitor.visit(*this))
     return false;
@@ -42,27 +55,31 @@ public:
 
   const RigTForm getAccumulatedRbt(int offsetFromStackTop = 0) {
     RigTForm base = RigTForm();
-    for (int i = 1; i < rbtStack_.size() - offsetFromStackTop; i++) {
+    for (int i = 0; i < rbtStack_.size() - offsetFromStackTop; i++) {
       base = base * rbtStack_[i];
     }
-
-
     return base;
-
   }
 
   virtual bool visit(SgTransformNode& node) {
-    rbtStack_.push_back(node.getRbt());
+    /* rbtStack_.push_back(node.getRbt()); */
 
-    if (node == target_) {
-      return false;
+    if (rbtStack_.empty()) {
+      rbtStack_.push_back(RigTForm());
+    }
+    else {
+      rbtStack_.push_back(node.getRbt());
     }
 
+    if (target_ == node) {
+      return false;
+    }
     return true;
   }
 
   virtual bool postVisit(SgTransformNode& node) {
-    //rbtStack_.pop_back();
+    rbtStack_.pop_back();
+    return true;
   }
 };
 

@@ -67,10 +67,10 @@ static const float g_frustFar = -50.0;    // far plane
 static const float g_groundY = -2.0;      // y coordinate of the ground
 static const float g_groundSize = 10.0;   // half the ground length
 
-enum ObjId {SKY=0, OBJECT0=1, OBJECT1=2};
+enum ObjId {SKY=0, ROBOT1=1, ROBOT2=2};
 enum SkyMode {WORLD_SKY=0, SKY_SKY=1};
 
-static const char * const g_objNames[] = {"Sky", "Object 0", "Object 1"};
+static const char * const g_objNames[] = {"Sky", "Robot 1", "Robot 2"};
 
 static int g_windowWidth = 512;
 static int g_windowHeight = 512;
@@ -103,6 +103,19 @@ static const char * const g_shaderFilesGl2[g_numShaders][2] = {
   {"./shaders/basic-gl2.vshader", "./shaders/pick-gl2.fshader"},
 };
 static vector<shared_ptr<ShaderState> > g_shaderStates; // our global shader states
+
+void print_rbt(RigTForm t) {
+  cout << "-------" << endl;
+  for (int i = 0; i < 4; ++i) {
+    cout << " ";
+    for (int j = 0; j < 4; ++j) {
+      cout << " " << rigTFormToMatrix(t)(i, j);
+    }
+    cout << endl;
+  }
+  cout << "-------" << endl;
+  cout << endl;
+}
 
 // --------- Geometry
 
@@ -237,28 +250,26 @@ static void sendProjectionMatrix(const ShaderState& curSS, const Matrix4& projMa
 }
 
 static RigTForm getRbtFromObjId(ObjId objId) {
-  if (objId == 0) {
+  if (objId == SKY) {
     return getPathAccumRbt(g_world, g_skyNode);
   }
-  else if (objId == 1) {
+  else if (objId == ROBOT1) {
     return getPathAccumRbt(g_world, g_robot1Node);
   }
-  else if (objId == 2) {
+  else if (objId == ROBOT2) {
     return getPathAccumRbt(g_world, g_robot2Node);
   }
   return RigTForm();
 }
 
 static void setRbtFromObjId(ObjId objId, const RigTForm& rbt) {
-  // RigTForm* rbts[] = {&g_skyRbt, &g_objectRbt[0], &g_objectRbt[1]};
-  // *rbts[objId] = rbt;
-  if (objId == 0) {
+  if (objId == SKY) {
     g_skyNode->setRbt(rbt);
   }
-  else if (objId == 1) {
+  else if (objId == ROBOT1) {
     g_robot1Node->setRbt(rbt);
   }
-  else if (objId == 2) {
+  else if (objId == ROBOT2) {
     g_robot2Node->setRbt(rbt);
   }
 
@@ -350,8 +361,7 @@ static void drawStuff(const ShaderState& curSS, bool picking) {
   const Matrix4 projmat = makeProjectionMatrix();
   sendProjectionMatrix(curSS, projmat);
 
-  //const RigTForm eyeRbt = getRbtFromObjId(g_activeEye);
-  const RigTForm eyeRbt = getPathAccumRbt(g_world, g_skyNode);
+  const RigTForm eyeRbt = getRbtFromObjId(g_activeEye);
   const RigTForm invEyeRbt = inv(eyeRbt);
 
   const Cvec3 eyeLight1 = Cvec3(invEyeRbt * Cvec4(g_light1, 1));
@@ -531,7 +541,7 @@ static void mouse(const int button, const int state, const int x, const int y) {
   if (g_picking && mouseClickUp) {
     g_picking = false;
     cerr << "Picking mode is off" << endl;
-    cerr << "current node is";
+    cerr << "current node is ";
     cerr << g_currentPickedRbtNode << endl;
   }
   if (g_picking && g_mouseClickDown) {
@@ -712,7 +722,6 @@ static void constructRobot(shared_ptr<SgTransformNode> base, const Cvec3& color)
       jointNodes[i].reset(new SgRbtNode(RigTForm(Cvec3(jointDesc[i].x, jointDesc[i].y, jointDesc[i].z))));
       jointNodes[jointDesc[i].parent]->addChild(jointNodes[i]);
     }
-    cout << jointNodes[i] << " " << names[i] << endl;
   }
   for (int i = 0; i < NUM_SHAPES; ++i) {
     shared_ptr<MyShapeNode> shape(
