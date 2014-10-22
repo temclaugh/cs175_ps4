@@ -553,7 +553,9 @@ static void motion(const int x, const int y) {
     const RigTForm A = makeMixedFrame(getPathAccumRbt(g_world, g_currentPickedRbtNode),
                                       getPathAccumRbt(g_world, eyeNode));
 
-    const RigTForm A_s = A * getPathAccumRbt(g_world, g_currentPickedRbtNode, 1); 
+    const RigTForm C_s = getPathAccumRbt(g_world, g_currentPickedRbtNode, 1);
+
+    const RigTForm A_s = inv(C_s) * A; 
 
     RigTForm O = doMtoOwrtA(M, g_currentPickedRbtNode->getRbt(), A_s);
 
@@ -589,8 +591,6 @@ static void mouse(const int button, const int state, const int x, const int y) {
   if (g_picking && mouseClickUp) {
     g_picking = false;
     cerr << "Picking mode is off" << endl;
-    cerr << "current node is ";
-    cerr << g_currentPickedRbtNode << endl;
   }
   if (g_picking && g_mouseClickDown) {
     pick();
