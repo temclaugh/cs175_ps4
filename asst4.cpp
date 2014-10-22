@@ -549,10 +549,6 @@ static void keyboard(const unsigned char key, const int x, const int y) {
     g_activeEye = ObjId((g_activeEye+1) % 3);
     cerr << "Active eye is " << g_objNames[g_activeEye] << endl;
     break;
-  case 'o':
-    g_activeObject = ObjId((g_activeObject+1) % 3);
-    cerr << "Active object is " << g_objNames[g_activeObject] << endl;
-    break;
   case 'm':
     g_activeCameraFrame = SkyMode((g_activeCameraFrame+1) % 2);
     cerr << "Editing sky eye w.r.t. " << (g_activeCameraFrame == WORLD_SKY ? "world-sky frame\n" : "sky-sky frame\n") << endl;
