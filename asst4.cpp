@@ -298,7 +298,9 @@ enum ManipMode {
 };
 
 static ManipMode getManipMode() {
-  if (g_activeObject == g_activeEye) {
+  if (g_activeObject == g_activeEye || 
+     (g_activeEye == ROBOT1 && g_currentPickedRbtNode == g_robot1Node) || 
+     (g_activeEye == ROBOT2 && g_currentPickedRbtNode == g_robot2Node)) {
     if (g_activeEye == SKY && g_activeCameraFrame == WORLD_SKY)
       return ARCBALL_ON_SKY;
     else
@@ -309,7 +311,7 @@ static ManipMode getManipMode() {
 }
 
 static bool shouldUseArcball() {
-  return getManipMode() != EGO_MOTION && (!(g_activeEye != SKY && g_activeObject == SKY));
+  return getManipMode() != EGO_MOTION && (g_activeEye == SKY || g_activeObject != SKY);
 }
 
 // The translation part of the aux frame either comes from the current
@@ -629,6 +631,14 @@ static void keyboard(const unsigned char key, const int x, const int y) {
     break;
   case 'v':
     g_activeEye = ObjId((g_activeEye+1) % 3);
+    if (g_activeEye == ROBOT1) {
+      g_currentPickedRbtNode = g_robot1Node;
+      g_activeObject = NULLOBJ;
+    }
+    else if (g_activeEye == ROBOT2) {
+      g_currentPickedRbtNode = g_robot2Node;
+      g_activeObject = NULLOBJ;
+    }
     cerr << "Active eye is " << g_objNames[g_activeEye] << endl;
     break;
   case 'm':
